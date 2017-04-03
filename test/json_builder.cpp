@@ -152,3 +152,15 @@ void JsonBuilder::addEngineInfos(std::vector<std::unique_ptr<Opswat::MDEngineInf
 		doc_.PushBack(engineInfo, doc_.GetAllocator());
 	}
 }
+
+void JsonBuilder::addScanRules(const std::vector<std::unique_ptr<Opswat::MDScanRuleInfo>> &scanRules)
+{
+	doc_.SetArray();
+	for (const auto& i : scanRules)
+	{
+		rapidjson::Value scanRuleInfo(rapidjson::kObjectType);
+		scanRuleInfo.AddMember("max_file_size", i->maxFileSize, doc_.GetAllocator());
+		scanRuleInfo.AddMember("name", i->name, doc_.GetAllocator());
+		doc_.PushBack(scanRuleInfo, doc_.GetAllocator());
+	}
+}

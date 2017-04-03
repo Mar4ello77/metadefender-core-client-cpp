@@ -503,6 +503,39 @@ struct MDErrorInfo
 	std::string errorMessage;
 };
 
+struct MDScanRuleInfo
+{
+	MDScanRuleInfo(const std::string& name, unsigned long long maxFileSize) : name(name),
+		maxFileSize(maxFileSize)
+	{}
+
+	std::string name;
+	unsigned long long maxFileSize;
+};
+
+struct MDAvailableScanRules
+{
+	MDAvailableScanRules(const std::string &scanRulesJSON)
+	{
+		try {
+			rapidjson::Document document;
+			document.Parse(scanRulesJSON.c_str());
+			for (auto &rule : document.GetArray())
+			{
+				scanRules.push_back(Utils::make_unique<MDScanRuleInfo>(					
+					rule["name"].GetString(),
+					rule["max_file_size"].GetInt64()));
+			}
+		}
+		catch (MDException& e)
+		{
+			throw MDParsingException(e.what(), scanRulesJSON);
+		}
+	}
+
+	std::vector<std::unique_ptr<MDScanRuleInfo>> scanRules;
+};
+
 };
 
 #endif

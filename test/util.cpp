@@ -90,3 +90,9 @@ bool operator==(const Opswat::MDEngineInfo &a, const Opswat::MDEngineInfo &b)
 		a.state == b.state &&
 		a.type == b.type;
 }
+
+bool operator==(const Opswat::MDScanRuleInfo &a, const Opswat::MDScanRuleInfo &b)
+{
+	return a.name == b.name &&
+		a.maxFileSize == b.maxFileSize;
+}

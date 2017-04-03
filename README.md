@@ -9,6 +9,7 @@ It is a header only library, so there is no need for building it.
 * **fetchScanResultById**: */file/{data_id}* for retrieving results via ID
 * **fetchScanResultByHash**: */hash/{md5|sha1|sha256 hash}* for retrieving results via hash
 * **fetchSanitizedFileById**: */file/converted/{data_id}* for retrieving a sanitized file via ID
+* **fetchAvailableScanRules**: */file/rules* for retrieving the available scan rules
 * **createSession**: */login* for creating a session
 * **destroySession**: */logout* for destroying a session
 * **getVersionInfo**: */version* for retrieving details about the product version

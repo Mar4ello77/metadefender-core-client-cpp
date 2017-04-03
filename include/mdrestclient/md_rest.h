@@ -123,6 +123,12 @@ public:
 	/// @param apiKey Valid api key
 	/// @return Structure holding the returned license information
 	std::unique_ptr<MDResponse<MDLicenseInfo>> getLicenseInfo();
+	
+	///  @brief Fetch available scan rules on Metadefender server
+	///
+	/// Fetches the available scan rules on the Metadefender server. 
+	/// @return Structure holding the list of the returned available scan rules
+	std::unique_ptr <MDResponse<MDAvailableScanRules>> fetchAvailableScanRules();
 
 	/// @brief Create login session
 	/// 
@@ -376,7 +382,23 @@ void MDRest<HttpSession>::useSession(std::string apiKey)
 }
 
 template<typename HttpSession>
-void MDRest<HttpSession>::checkResponse(const MDHttpResponse& response) const
+std::unique_ptr <MDResponse<MDAvailableScanRules>> MDRest<HttpSession>::fetchAvailableScanRules()
+{
+	MDHttpRequest request;
+	request.method = HTTP_METHOD::HTTP_GET;
+	request.url = "/file/rules";
+	request.headers = std::map<std::string, std::string>{ {"apikey", apiKey_} };
+	request.inStream = nullptr;
+
+	auto response = session_->sendRequest(request);
+
+	checkResponse(*response);
+
+	return Utils::make_unique<MDResponse<MDAvailableScanRules>>(response->body);
+}
+
+template<typename HttpSession>
+void MDRest<HttpSession>::checkResponse(const MDHttpResponse &response) const
 {
 	const int HTTP_STATUS_OK = 200;
 

@@ -25,6 +25,7 @@ add_executable(test-mdrestclient
 	tst_scan_file.cpp
 	tst_scan_file_by_path.cpp
 	tst_version_info.cpp
+	tst_fetch_available_scan_rules.cpp
 	util.cpp
 )
 

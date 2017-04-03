@@ -12,6 +12,7 @@ bool operator==(const Opswat::MDScanResult &a, const Opswat::MDScanResult &b);
 bool operator==(const Opswat::MDExtractedFileInfo &a, const Opswat::MDExtractedFileInfo &b);
 bool operator==(const Opswat::MDEngineScanResult &a, const Opswat::MDEngineScanResult &b);
 bool operator==(const Opswat::MDEngineInfo &a, const Opswat::MDEngineInfo &b);
+bool operator==(const Opswat::MDScanRuleInfo &a, const Opswat::MDScanRuleInfo &b);
 
 template<typename T>
 bool equal(const std::unique_ptr<T> &a, const std::unique_ptr<T> &b)

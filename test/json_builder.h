@@ -20,6 +20,7 @@ public:
 	void addScanResults(const std::unique_ptr<Opswat::MDScanResult> &scanResult);
 	void addProcessInfo(const std::unique_ptr<Opswat::MDProcessInfo> &processInfo);
 	void addEngineInfos(std::vector<std::unique_ptr<Opswat::MDEngineInfo>> &engineInfos);
+	void addScanRules(const std::vector<std::unique_ptr<Opswat::MDScanRuleInfo>> &scanRules);
 
 	std::string getJson();
 	rapidjson::Document doc_;
