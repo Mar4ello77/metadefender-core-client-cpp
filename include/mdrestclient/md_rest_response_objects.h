@@ -505,12 +505,12 @@ struct MDErrorInfo
 
 struct MDScanRuleInfo
 {
-	MDScanRuleInfo(const std::string& name, unsigned long long maxFileSize) : name(name),
+	MDScanRuleInfo(const std::string& name, int64_t maxFileSize) : name(name),
 		maxFileSize(maxFileSize)
 	{}
 
 	std::string name;
-	unsigned long long maxFileSize;
+    int64_t maxFileSize;
 };
 
 struct MDAvailableScanRules
