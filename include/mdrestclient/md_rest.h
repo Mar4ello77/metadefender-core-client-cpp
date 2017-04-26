@@ -126,9 +126,10 @@ public:
 	
 	///  @brief Fetch available scan rules on Metadefender server
 	///
-	/// Fetches the available scan rules on the Metadefender server. 
+	/// Fetches the available scan rules on the Metadefender server.
+	/// @param userAgent Client's identification
 	/// @return Structure holding the list of the returned available scan rules
-	std::unique_ptr <MDResponse<MDAvailableScanRules>> fetchAvailableScanRules();
+	std::unique_ptr <MDResponse<MDAvailableScanRules>> fetchAvailableScanRules(const std::string& userAgent = std::string());
 
 	/// @brief Create login session
 	/// 
@@ -382,12 +383,15 @@ void MDRest<HttpSession>::useSession(std::string apiKey)
 }
 
 template<typename HttpSession>
-std::unique_ptr <MDResponse<MDAvailableScanRules>> MDRest<HttpSession>::fetchAvailableScanRules()
+std::unique_ptr <MDResponse<MDAvailableScanRules>> MDRest<HttpSession>::fetchAvailableScanRules(const std::string& userAgent)
 {
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/rules";
-	request.headers = std::map<std::string, std::string>{ {"apikey", apiKey_} };
+	request.headers = std::map<std::string, std::string> {
+		{"apikey", apiKey_},
+		{"user_agent", userAgent}
+	};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
