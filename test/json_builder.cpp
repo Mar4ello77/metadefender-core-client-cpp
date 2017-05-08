@@ -72,7 +72,7 @@ void JsonBuilder::addFileInfo(const std::unique_ptr<Opswat::MDFileInfo> &fileInf
 	doc_.AddMember("file_info", fileInfoValue, doc_.GetAllocator());
 }
 
-void JsonBuilder::addScanResults(const std::unique_ptr<Opswat::MDScanResult> &scanResult)
+void JsonBuilder::addScanResults(const std::unique_ptr<Opswat::MDScanResult> &scanResult, bool lowVisibility)
 {
 	rapidjson::Value scanResultValue(rapidjson::kObjectType);
 	scanResultValue.AddMember("data_id", scanResult->dataId, doc_.GetAllocator());
@@ -88,10 +88,12 @@ void JsonBuilder::addScanResults(const std::unique_ptr<Opswat::MDScanResult> &sc
 		for (auto &i : scanResult->scanDetails)
 		{
 			rapidjson::Value engineDetail(rapidjson::kObjectType);
-			engineDetail.AddMember("def_time", i.second->virusDefDate, doc_.GetAllocator());
-			engineDetail.AddMember("location", i.second->location, doc_.GetAllocator());
+			if (!lowVisibility) {
+				engineDetail.AddMember("def_time", i.second->virusDefDate, doc_.GetAllocator());
+				engineDetail.AddMember("location", i.second->location, doc_.GetAllocator());
+				engineDetail.AddMember("scan_time", i.second->scanDuration, doc_.GetAllocator());
+			}
 			engineDetail.AddMember("scan_result_i", i.second->scanResultCode, doc_.GetAllocator());
-			engineDetail.AddMember("scan_time", i.second->scanDuration, doc_.GetAllocator());
 			engineDetail.AddMember("threat_found", i.second->threat, doc_.GetAllocator());
 			rapidjson::Value key(i.second->engineName, doc_.GetAllocator());
 			scanDetails.AddMember(key, engineDetail, doc_.GetAllocator());
