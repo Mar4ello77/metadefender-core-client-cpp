@@ -226,7 +226,7 @@ TEST_F(TestFetchScanResultByHash, OkStatusWithMissingScanResultDetailsFields)
 {
 	std::string dataId = "123";
 
-	std::string shit = builder.getJson();auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
+	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
 	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
 	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
 
