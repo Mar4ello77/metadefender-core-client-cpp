@@ -191,8 +191,11 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResult)
 	MockHttpClient::expectedResp_.reasonPhrase = "OK";
 
 	std::unique_ptr<Opswat::MDResponse<Opswat::MDFileScanResult>> result = client.fetchScanResultById(fakeId);
+	std::unique_ptr<Opswat::MDFileScanResult> parsedResult = result->parse();
 	EXPECT_EQ(MockHttpClient::expectedResp_.body, result->getJSON());
-	EXPECT_ANY_THROW(result->parse());
+	EXPECT_EQ(parsedResult->dataId, dataId);
+	EXPECT_TRUE(equal(parsedResult->fileInfo, fileInfoObj));
+	EXPECT_TRUE(equal(parsedResult->processInfo, processInfoObj));
 }
 
 TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResultDetails)
@@ -217,6 +220,41 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResultDetails)
 	std::unique_ptr<Opswat::MDResponse<Opswat::MDFileScanResult>> result = client.fetchScanResultById(fakeId);
 	EXPECT_EQ(MockHttpClient::expectedResp_.body, result->getJSON());
 	EXPECT_ANY_THROW(result->parse());
+}
+
+TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResultDetailsFields)
+{
+	std::string dataId = "123";
+	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
+	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+
+	JsonBuilder builder;
+	builder.addDataId(dataId);
+	builder.addFileInfo(fileInfoObj);
+	builder.addProcessInfo(processInfoObj);
+	builder.addScanResults(scanResultsObj, true);
+
+	MockHttpClient::expectedResp_.body = builder.getJson();
+	MockHttpClient::expectedResp_.statusCode = 200;
+	MockHttpClient::expectedResp_.reasonPhrase = "OK";
+
+	std::unique_ptr<Opswat::MDResponse<Opswat::MDFileScanResult>> result = client.fetchScanResultById(fakeId);
+	std::unique_ptr<Opswat::MDFileScanResult> parsedResult = result->parse();
+	EXPECT_EQ(MockHttpClient::expectedResp_.body, result->getJSON());
+	EXPECT_EQ(parsedResult->dataId, dataId);
+	EXPECT_TRUE(equal(parsedResult->fileInfo, fileInfoObj));
+	EXPECT_TRUE(equal(parsedResult->processInfo, processInfoObj));
+
+	for (const auto& scanDetail : parsedResult->scanResult->scanDetails)
+	{
+		const std::string engineName = scanDetail.first;
+		EXPECT_EQ(parsedResult->scanResult->scanDetails[engineName]->scanResultCode, scanResultsObj->scanDetails[engineName]->scanResultCode);
+		EXPECT_EQ(parsedResult->scanResult->scanDetails[engineName]->threat, scanResultsObj->scanDetails[engineName]->threat);
+		EXPECT_EQ(0, parsedResult->scanResult->scanDetails[engineName]->scanDuration);
+		EXPECT_TRUE(parsedResult->scanResult->scanDetails[engineName]->location.empty());
+		EXPECT_TRUE(parsedResult->scanResult->scanDetails[engineName]->virusDefDate.empty());
+	}
 }
 
 TEST_F(TestFetchScanResultById, OkStatusWithMissingDataId)

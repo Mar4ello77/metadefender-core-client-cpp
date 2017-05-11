@@ -223,27 +223,30 @@ struct MDFileScanResult
 				fileInfoObject["upload_timestamp"].GetString()
 				);
 
-			auto scanResultsObject = document["scan_results"].GetObject();
-			scanResult = Utils::make_unique<MDScanResult>(scanResultsObject["data_id"].GetString(),
-				scanResultsObject["progress_percentage"].GetInt(),
-				scanResultsObject["scan_all_result_a"].GetString(),
-				scanResultsObject["scan_all_result_i"].GetInt(),
-				scanResultsObject["start_time"].GetString(),
-				scanResultsObject["total_avs"].GetInt(),
-				scanResultsObject["total_time"].GetInt64()
-				);
-
-			auto scanDetailsObject = scanResultsObject["scan_details"].GetObject();
-			for(auto& elem : scanDetailsObject)
+			if(document.HasMember("scan_results"))
 			{
-				std::string engineName = elem.name.GetString();
-				scanResult->scanDetails[engineName] = Utils::make_unique<MDEngineScanResult>(engineName,
-					elem.value["scan_result_i"].GetInt(),
-					elem.value["threat_found"].GetString(),
-					elem.value["scan_time"].GetInt64(),
-					elem.value["def_time"].GetString(),
-					elem.value["location"].GetString()
+				auto scanResultsObject = document["scan_results"].GetObject();
+				scanResult = Utils::make_unique<MDScanResult>(scanResultsObject["data_id"].GetString(),
+					scanResultsObject["progress_percentage"].GetInt(),
+					scanResultsObject["scan_all_result_a"].GetString(),
+					scanResultsObject["scan_all_result_i"].GetInt(),
+					scanResultsObject["start_time"].GetString(),
+					scanResultsObject["total_avs"].GetInt(),
+					scanResultsObject["total_time"].GetInt64()
 					);
+
+				auto scanDetailsObject = scanResultsObject["scan_details"].GetObject();
+				for(const auto& elem : scanDetailsObject)
+				{
+					std::string engineName = elem.name.GetString();
+					scanResult->scanDetails[engineName] = Utils::make_unique<MDEngineScanResult>(engineName,
+						elem.value["scan_result_i"].GetInt(),
+						elem.value["threat_found"].GetString(),
+						elem.value.HasMember("scan_time") ? elem.value["scan_time"].GetInt64() : 0,
+						elem.value.HasMember("def_time")  ? elem.value["def_time"].GetString() : std::string(),
+						elem.value.HasMember("location")  ? elem.value["location"].GetString() : std::string()
+						);
+				}
 			}
 
 			auto procInfoObject = document["process_info"].GetObject();
