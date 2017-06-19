@@ -56,7 +56,7 @@ public:
 
 private:
 
-	std::unique_ptr<MDHttpResponse> send(MDHttpRequest& request, std::ostream& outStream);	
+	std::unique_ptr<MDHttpResponse> send(MDHttpRequest& request, std::ostream& outStream);
 
 private:
 
@@ -73,7 +73,7 @@ size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 		size_t realsize = size * nmemb;
 		std::ostream* buffer = static_cast<std::ostream*>(userp);
 		buffer->write(static_cast<char*>(contents), realsize);
-		bytesWritten = *buffer ? realsize : 0;		
+		bytesWritten = *buffer ? realsize : 0;
 	}
 	catch(...)
 	{
@@ -98,7 +98,7 @@ size_t ReadCallback(char* ptr, size_t size, size_t nmemb, void* input)
 		}
 		else
 		{
-			return inStream->eof() ? 0 : CURL_READFUNC_ABORT;			
+			return inStream->eof() ? 0 : CURL_READFUNC_ABORT;
 		}
 	}
 	catch(...)
@@ -152,6 +152,7 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 
 	curl_easy_reset(curl_);
 	curl_easy_setopt(curl_, CURLOPT_URL, (address_ + request.url).c_str());
+	curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT, 30L);
 	if(request.method == HTTP_METHOD::HTTP_GET)
 	{
 		curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
@@ -172,8 +173,8 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 		}
 		else
 		{
-			curl_easy_setopt(curl_, CURLOPT_POST, 1L);							
-			curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, "");			
+			curl_easy_setopt(curl_, CURLOPT_POST, 1L);
+			curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, "");
 		}
 	}
 	else
@@ -209,7 +210,7 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 			}
 		}
 	}	
-	curl_slist_append(slist, "Expect: ");		
+	curl_slist_append(slist, "Expect: ");
 	curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, slist);
 	curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, WriteCallback);
 
