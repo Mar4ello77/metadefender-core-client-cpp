@@ -110,7 +110,7 @@ size_t ReadCallback(char* ptr, size_t size, size_t nmemb, void* input)
 inline
 MDCurlHttpClient::MDCurlHttpClient(const std::string& serverAddress, int port)
 {
-	if(serverAddress.find("http://") == std::string::npos)
+	if(serverAddress.find("http://") == std::string::npos && serverAddress.find("https://") == std::string::npos)
 	{
 		address_ += "http://";
 	}
@@ -148,7 +148,7 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 	if(!curl_)
 	{
 		throw Opswat::MDConnectionException(MD_CONNECTION_ERROR);
-	}				
+	}
 
 	curl_easy_reset(curl_);
 	curl_easy_setopt(curl_, CURLOPT_URL, (address_ + request.url).c_str());
