@@ -67,7 +67,14 @@ public:
 		const std::string& userAgent = std::string(),
 		const std::string& rule = std::string(),
 		const std::string& archivePwd = std::string());
-	
+
+	/// @brief Cancel scan by id
+	///
+	/// Initiates cancellation of a scan with the given id
+	///
+	/// @param dataId DataId for a previously initiated scan
+	std::string cancelScanById(const std::string& dataId);
+
 	/// @brief Fetch scan result by Id
 	/// 
 	/// Fetches the status of a previously initiated scan based on the scan's Id.
@@ -234,6 +241,22 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFile(std::ist
 }
 
 template<typename HttpSession>
+std::string MDRest<HttpSession>::cancelScanById(const std::string& dataId)
+{
+	MDHttpRequest request;
+	request.method = HTTP_METHOD::HTTP_POST;
+	request.url = "/file/" + dataId + "/cancel";
+	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.inStream = nullptr;
+
+	auto response = session_->sendRequest(request);
+
+	checkResponse(*response);
+
+	return response->body;
+}
+
+template<typename HttpSession>
 std::unique_ptr<MDResponse<MDFileScanResult>> MDRest<HttpSession>::fetchScanResultById(const std::string& dataId)
 {
 	MDHttpRequest request;
@@ -292,7 +315,7 @@ void MDRest<HttpSession>::fetchSanitizedFileById(const std::string& dataId, std:
 
 	auto response = session_->sendRequest(request, outStream);
 
-	checkResponse(*response);	
+	checkResponse(*response);
 }
 
 template<typename HttpSession>
