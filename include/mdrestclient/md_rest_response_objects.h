@@ -525,7 +525,7 @@ struct MDAvailableScanRules
 			document.Parse(scanRulesJSON.c_str());
 			for (auto &rule : document.GetArray())
 			{
-				scanRules.push_back(Utils::make_unique<MDScanRuleInfo>(					
+				scanRules.push_back(Utils::make_unique<MDScanRuleInfo>(
 					rule["name"].GetString(),
 					rule["max_file_size"].GetInt64()));
 			}

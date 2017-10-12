@@ -31,8 +31,8 @@ TEST_F(TestFetchSanitizedFileById, OkStatus)
 	MockHttpClient::expectedResp_.statusCode = 200;
 	MockHttpClient::expectedResp_.reasonPhrase = "OK";
 
-	std::string result = client.fetchSanitizedFileById(fakeId);	
-	EXPECT_EQ(MockHttpClient::expectedResp_.body, result);		
+	std::string result = client.fetchSanitizedFileById(fakeId);
+	EXPECT_EQ(MockHttpClient::expectedResp_.body, result);
 }
 
 TEST_F(TestFetchSanitizedFileById, OkStatusWriteIntoStream)
@@ -52,7 +52,7 @@ TEST_F(TestFetchSanitizedFileById, NotOkStatus)
 	MockHttpClient::expectedResp_.statusCode = 404;
 	MockHttpClient::expectedResp_.reasonPhrase = "Not Found";
 
-	EXPECT_ANY_THROW(client.fetchSanitizedFileById(fakeId));	
+	EXPECT_ANY_THROW(client.fetchSanitizedFileById(fakeId));
 }
 
 TEST_F(TestFetchSanitizedFileById, NotOkStatusWriteIntoStream)

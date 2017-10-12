@@ -216,11 +216,24 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 
 	auto resp = Utils::make_unique<MDHttpResponse>();
 	curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &outStream);
+
+	char errbuf[CURL_ERROR_SIZE];
+	curl_easy_setopt(curl_, CURLOPT_ERRORBUFFER, errbuf);
+	errbuf[0] = 0;
+
 	CURLcode res = curl_easy_perform(curl_);
 	curl_slist_free_all(slist);
 	if(res != CURLE_OK)
 	{
-		throw Opswat::MDConnectionException(curl_easy_strerror(res));
+		size_t len = strlen(errbuf);
+		if(len)
+		{
+			throw Opswat::MDConnectionException(errbuf);
+		}
+		else
+		{
+			throw Opswat::MDConnectionException(curl_easy_strerror(res));
+		}
 	}
 	curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &resp->statusCode);
 
