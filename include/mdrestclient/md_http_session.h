@@ -51,6 +51,11 @@ public:
 	/// @return Remote server's port
 	int getPort() const;
 
+	/// @brief Sets whether the authenticity of the peer's certificate should be verified
+	///
+	/// @param verifyPeer Peer verification status
+	virtual void setVerifyPeer(bool verifyPeer) = 0;
+
 private:
 
 	std::string serverAddress_;
@@ -69,6 +74,7 @@ public:
 
 	std::unique_ptr<MDHttpResponse> sendRequest(MDHttpRequest& request);
 	std::unique_ptr<MDHttpResponse> sendRequest(MDHttpRequest& request, std::ostream& outStream);
+	void setVerifyPeer(bool verifyPeer);
 
 private:
 
@@ -87,6 +93,11 @@ public:
 
 	std::unique_ptr<MDHttpResponse> sendRequest(MDHttpRequest& request);
 	std::unique_ptr<MDHttpResponse> sendRequest(MDHttpRequest& request, std::ostream& outStream);
+	void setVerifyPeer(bool verifyPeer);
+
+private:
+
+	bool verifyPeer_;
 };
 
 template<typename HttpClient>
@@ -129,6 +140,12 @@ std::unique_ptr<MDHttpResponse> MDPersistentHttpSession<HttpClient>::sendRequest
 }
 
 template<typename HttpClient>
+void MDPersistentHttpSession<HttpClient>::setVerifyPeer(bool verifyPeer)
+{
+	client_->setVerifyPeer(verifyPeer);
+}
+
+template<typename HttpClient>
 MDSimpleHttpSession<HttpClient>::MDSimpleHttpSession(const std::string& serverAddress, int port) : IMDHttpSession<HttpClient>(serverAddress, port)
 {
 }
@@ -136,7 +153,8 @@ MDSimpleHttpSession<HttpClient>::MDSimpleHttpSession(const std::string& serverAd
 template<typename HttpClient>
 std::unique_ptr<MDHttpResponse> MDSimpleHttpSession<HttpClient>::sendRequest(MDHttpRequest& request)
 {
-	HttpClient client(this->getServerAddress(), this->getPort());	
+	HttpClient client(this->getServerAddress(), this->getPort());
+	client.setVerifyPeer(verifyPeer_);
 	return client.sendRequest(request);
 }
 
@@ -144,7 +162,14 @@ template<typename HttpClient>
 std::unique_ptr<MDHttpResponse> MDSimpleHttpSession<HttpClient>::sendRequest(MDHttpRequest& request, std::ostream& outStream)
 {
 	HttpClient client(this->getServerAddress(), this->getPort());
+	client.setVerifyPeer(verifyPeer_);
 	return client.sendRequest(request, outStream);
+}
+
+template<typename HttpClient>
+void MDSimpleHttpSession<HttpClient>::setVerifyPeer(bool verifyPeer)
+{
+	verifyPeer_ = verifyPeer;
 }
 
 };
