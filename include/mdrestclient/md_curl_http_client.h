@@ -153,6 +153,11 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 	curl_easy_reset(curl_);
 	curl_easy_setopt(curl_, CURLOPT_URL, (address_ + request.url).c_str());
 	curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT, 30L);
+	if(!verifyPeer_)
+	{
+		curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 0L);
+	}
+
 	if(request.method == HTTP_METHOD::HTTP_GET)
 	{
 		curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
