@@ -164,6 +164,7 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 			request.inStream->seekg(0, std::ios::end);
 			unsigned long long contentSize = request.inStream->tellg();
 			request.inStream->seekg(0, std::ios::beg);
+			request.headers["X-File-Size"] = std::to_string(contentSize);
 
 			curl_easy_setopt(curl_, CURLOPT_POST, 1L);
 			curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, NULL);
