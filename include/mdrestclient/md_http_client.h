@@ -52,7 +52,7 @@ class IMDHttpClient
 public:
 
 	/// @brief Constructor
-	IMDHttpClient() {}
+	IMDHttpClient() : verifyPeer_(true) {}
 
 	/// @brief Destructor
 	virtual ~IMDHttpClient() {}
@@ -69,7 +69,21 @@ public:
 	/// @param outStream Stream that the response body will be written into
 	/// @return Http response for the initiated request
 	virtual std::unique_ptr<MDHttpResponse> sendRequest(MDHttpRequest& request, std::ostream& outStream) = 0;
+
+	/// @brief Sets whether the authenticity of the peer's certificate should be verified
+	///
+	/// @param verifyPeer Peer verification status
+	void setVerifyPeer(bool verifyPeer);
+
+protected:
+	bool verifyPeer_;
 };
+
+inline
+void IMDHttpClient::setVerifyPeer(bool verifyPeer)
+{
+	verifyPeer_ = verifyPeer;
+}
 
 };
 
