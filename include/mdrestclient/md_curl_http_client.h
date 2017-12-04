@@ -216,7 +216,7 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 			}
 		}
 	}	
-	curl_slist_append(slist, "Expect: ");
+	slist = curl_slist_append(slist, "Expect: ");
 	curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, slist);
 	curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, WriteCallback);
 
