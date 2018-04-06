@@ -86,16 +86,14 @@ struct MDEngineScanResult
 	std::string location;
 };
 
-struct MDScanResult
+struct MDBaseScanResult
 {
-	MDScanResult(const std::string& dataId,
-		int processPercentage,
+	MDBaseScanResult(const std::string& id,
 		const std::string& scanAllResultDesc,
 		int scanAllResultCode,
 		const std::string& startDate,
 		int numEngines,
-		int64_t scanDuration) : dataId(dataId),
-								processPercentage(processPercentage),
+		int64_t scanDuration) : id(id),
 								scanAllResultDesc(scanAllResultDesc),
 								scanAllResultCode(scanAllResultCode),
 								startDate(startDate),
@@ -104,14 +102,29 @@ struct MDScanResult
 	{
 	}
 
-	std::string dataId;
-	int processPercentage;
+	std::string id;
 	std::string scanAllResultDesc;
 	int scanAllResultCode;
-	std::map<std::string, std::unique_ptr<MDEngineScanResult>> scanDetails;
 	std::string startDate;
 	int numEngines;
 	int64_t scanDuration;
+};
+
+struct MDExtendedScanResult : public MDBaseScanResult
+{
+	MDExtendedScanResult(const std::string& id,
+		int processPercentage,
+		const std::string& scanAllResultDesc,
+		int scanAllResultCode,
+		const std::string& startDate,
+		int numEngines,
+		int64_t scanDuration) : MDBaseScanResult(id, scanAllResultDesc, scanAllResultCode, startDate, numEngines, scanDuration),
+								processPercentage(processPercentage)
+	{
+	}
+
+	int processPercentage;
+	std::map<std::string, std::unique_ptr<MDEngineScanResult>> scanDetails;
 };
 
 struct MDPostProcessInfo
@@ -135,17 +148,15 @@ struct MDPostProcessInfo
 	std::string convertedDestination;
 };
 
-struct MDProcessInfo
+struct MDBaseProcessInfo
 {
-	MDProcessInfo(bool skipped,
+	MDBaseProcessInfo(bool skipped,
 		const std::string& blockedReason,
 		const std::string& profile,
-		int processPercentage,
 		const std::string& result,
 		const std::string& userAgent) : skippedFileType(skipped),
 										blockedReason(blockedReason),
 										profile(profile),
-										processPercentage(processPercentage),
 										result(result),
 										userAgent(userAgent)
 	{
@@ -154,24 +165,38 @@ struct MDProcessInfo
 	bool skippedFileType;
 	std::string blockedReason;
 	std::string profile;
-	int processPercentage;
 	std::string result;
 	std::string userAgent;
+};
+
+struct MDExtendedProcessInfo : public MDBaseProcessInfo
+{
+	MDExtendedProcessInfo(bool skipped,
+		const std::string& blockedReason,
+		const std::string& profile,
+		int processPercentage,
+		const std::string& result,
+		const std::string& userAgent) : MDBaseProcessInfo(skipped, blockedReason, profile, result, userAgent),
+										processPercentage(processPercentage)
+	{
+	}
+
+	int processPercentage;
 	std::unique_ptr<MDPostProcessInfo> postProcessInfo;
 };
 
 struct MDExtractedFileInfo
 {
-	MDExtractedFileInfo(const std::string& dataId, 
-		int detecetedBy, 
-		const std::string& displayName, 
-		int64_t fileSize, 
-		const std::string& fileType, 
-		const std::string& fileTypeDescription, 
-		int progressPercentage, 
+	MDExtractedFileInfo(const std::string& dataId,
+		int detectedBy,
+		const std::string& displayName,
+		int64_t fileSize,
+		const std::string& fileType,
+		const std::string& fileTypeDescription,
+		int progressPercentage,
 		int scanAllResultCode,
 		int scannedWith) : dataId(dataId),
-									detectedBy(detecetedBy),
+									detectedBy(detectedBy),
 									displayName(displayName),
 									fileSize(fileSize),
 									fileType(fileType),
@@ -194,7 +219,7 @@ struct MDExtractedFileInfo
 };
 
 struct MDFileScanResult
-{	
+{
 	MDFileScanResult(const std::string& fileScanResultJSON)
 	{
 		try
@@ -226,7 +251,7 @@ struct MDFileScanResult
 			if(document.HasMember("scan_results"))
 			{
 				auto scanResultsObject = document["scan_results"].GetObject();
-				scanResult = Utils::make_unique<MDScanResult>(scanResultsObject["data_id"].GetString(),
+				scanResult = Utils::make_unique<MDExtendedScanResult>(scanResultsObject["data_id"].GetString(),
 					scanResultsObject["progress_percentage"].GetInt(),
 					scanResultsObject["scan_all_result_a"].GetString(),
 					scanResultsObject["scan_all_result_i"].GetInt(),
@@ -250,7 +275,7 @@ struct MDFileScanResult
 			}
 
 			auto procInfoObject = document["process_info"].GetObject();
-			processInfo = Utils::make_unique<MDProcessInfo>(
+			processInfo = Utils::make_unique<MDExtendedProcessInfo>(
 				procInfoObject["file_type_skipped_scan"].GetBool(),
 				procInfoObject["blocked_reason"].GetString(),
 				procInfoObject["profile"].GetString(),
@@ -301,8 +326,8 @@ struct MDFileScanResult
 
 	std::string dataId;
 	std::unique_ptr<MDFileInfo> fileInfo;
-	std::unique_ptr<MDScanResult> scanResult;
-	std::unique_ptr<MDProcessInfo> processInfo;
+	std::unique_ptr<MDExtendedScanResult> scanResult;
+	std::unique_ptr<MDExtendedProcessInfo> processInfo;
 	std::vector<std::unique_ptr<MDExtractedFileInfo>> extractedFiles;
 };
 
@@ -328,7 +353,7 @@ struct MDVersionInfo
 };
 
 struct MDLicenseInfo
-{	
+{
 	MDLicenseInfo(const std::string& licenseInfoJSON)
 	{
 		try
@@ -369,17 +394,17 @@ struct MDLicenseInfo
 			throw MDParsingException(e.what(), licenseInfoJSON);
 		}
 	}
-		
-	std::string deployment;	
+
+	std::string deployment;
 	int daysLeft;
-	bool isValid;	
+	bool isValid;
 	bool onlineActivated;
 
 	std::map<std::string, std::string> additionalLicenseInfo;
 };
 
 struct MDLoginInfo
-{	
+{
 	MDLoginInfo(const std::string& loginInfoJSON)
 	{
 		try
@@ -398,7 +423,7 @@ struct MDLoginInfo
 };
 
 struct MDLogoutInfo
-{	
+{
 	MDLogoutInfo(const std::string& logoutInfoJSON)
 	{
 		try
@@ -456,7 +481,7 @@ struct MDEngineInfo
 };
 
 struct MDEnginesList
-{	
+{
 	MDEnginesList(const std::string& engineInfoJSON)
 	{
 		try
@@ -488,7 +513,7 @@ struct MDEnginesList
 };
 
 struct MDErrorInfo
-{	
+{
 	MDErrorInfo(const std::string& errorInfoJSON)
 	{
 		try
@@ -537,6 +562,176 @@ struct MDAvailableScanRules
 	}
 
 	std::vector<std::unique_ptr<MDScanRuleInfo>> scanRules;
+};
+
+struct MDInitBatch
+{
+	MDInitBatch(const std::string& batchIdJSON)
+	{
+		try {
+			rapidjson::Document document;
+			document.Parse(batchIdJSON.c_str());
+			batchId = document["batch_id"].GetString();
+		}
+		catch(MDException &e)
+		{
+			throw MDParsingException(e.what(), batchIdJSON);
+		}
+	}
+
+	public:
+		std::string batchId;
+};
+
+struct MDBatchFileProcessInfo
+{
+	MDBatchFileProcessInfo(const std::string& blockedReason,
+		int progressPercentage,
+		const std::string& result) : blockedReason(blockedReason),
+										progressPercentage(progressPercentage),
+										result(result)
+	{
+	}
+
+	std::string blockedReason;
+	int progressPercentage;
+	std::string result;
+};
+
+struct MDFileInBatch
+{
+	MDFileInBatch(const std::string dataId,
+		int detectedBy,
+		const std::string& displayName,
+		int64_t fileSize,
+		const std::string& fileType,
+		const std::string& fileTypeDesc,
+		std::unique_ptr<MDBatchFileProcessInfo> processInfo,
+		int progressPercentage,
+		const std::string& scanAllResultDesc,
+		int scanAllResultCode,
+		int scannedWith) : dataId(dataId),
+							detectedBy(detectedBy),
+							displayName(displayName),
+							fileSize(fileSize),
+							fileType(fileType),
+							fileTypeDesc(fileTypeDesc),
+							processInfo(std::move(processInfo)),
+							progressPercentage(progressPercentage),
+							scanAllResultDesc(scanAllResultDesc),
+							scanAllResultCode(scanAllResultCode),
+							scannedWith(scannedWith)
+	{
+	}
+
+	std::string dataId;
+	int detectedBy;
+	std::string displayName;
+	int64_t fileSize;
+	std::string fileType;
+	std::string fileTypeDesc;
+	std::unique_ptr<MDBatchFileProcessInfo> processInfo;
+	int progressPercentage;
+	std::string scanAllResultDesc;
+	int scanAllResultCode;
+	int scannedWith;
+};
+
+struct MDBatchFiles
+{
+	MDBatchFiles(int batchCount,
+		int firstIndex,
+		int pageSize,
+		std::vector<std::unique_ptr<MDFileInBatch>> filesInBatch) : batchCount(batchCount),
+																	firstIndex(firstIndex),
+																	pageSize(pageSize),
+																	filesInBatch(std::move(filesInBatch))
+	{
+	}
+
+	int batchCount;
+	int firstIndex;
+	int pageSize;
+	std::vector<std::unique_ptr<MDFileInBatch>> filesInBatch;
+};
+
+struct MDBatchResult
+{
+	MDBatchResult(const std::string& batchResultJSON)
+	{
+		try
+		{
+			rapidjson::Document document;
+			document.Parse(batchResultJSON.c_str());
+
+			batchId = document["batch_id"].GetString();
+			isClosed = document["is_closed"].GetBool();
+			userData = document["user_data"].GetString();
+
+			auto batchFilesObject = document["batch_files"].GetObject();
+
+			std::vector<std::unique_ptr<MDFileInBatch>> filesInBatch;
+			if (batchFilesObject.HasMember("files_in_batch"))
+			{
+				auto filesInBatchArray = batchFilesObject["files_in_batch"].GetArray();
+				for(auto& fileObject : filesInBatchArray)
+				{
+					auto fileProcessInfoObject = fileObject["process_info"].GetObject();
+
+					filesInBatch.push_back(Utils::make_unique<MDFileInBatch>(fileObject["data_id"].GetString(),
+						fileObject["detected_by"].GetInt(),
+						fileObject["display_name"].GetString(),
+						fileObject["file_size"].GetInt64(),
+						fileObject["file_type"].GetString(),
+						fileObject["file_type_description"].GetString(),
+						Utils::make_unique<MDBatchFileProcessInfo>(fileProcessInfoObject["blocked_reason"].GetString(),
+							fileProcessInfoObject["progress_percentage"].GetInt(),
+							fileProcessInfoObject["result"].GetString()),
+						fileObject["progress_percentage"].GetInt(),
+						fileObject["scan_all_result_a"].GetString(),
+						fileObject["scan_all_result_i"].GetInt(),
+						fileObject["scanned_with"].GetInt()));
+				}
+
+				batchFiles = Utils::make_unique<MDBatchFiles>(batchFilesObject["batch_count"].GetInt(),
+				batchFilesObject["first_index"].GetInt(),
+				batchFilesObject["page_size"].GetInt(),
+				std::move(filesInBatch));
+			}
+			else
+			{
+				batchFiles = Utils::make_unique<MDBatchFiles>(batchFilesObject["batch_count"].GetInt(), 0, 0, std::move(filesInBatch));
+			}
+
+			auto scanResultsObject = document["scan_results"].GetObject();
+			scanResult = Utils::make_unique<MDBaseScanResult>(scanResultsObject["batch_id"].GetString(),
+				scanResultsObject["scan_all_result_a"].GetString(),
+				scanResultsObject["scan_all_result_i"].GetInt(),
+				scanResultsObject["start_time"].GetString(),
+				scanResultsObject["total_avs"].GetInt(),
+				scanResultsObject["total_time"].GetInt64());
+
+			auto procInfoObject = document["process_info"].GetObject();
+			processInfo = Utils::make_unique<MDBaseProcessInfo>(procInfoObject["file_type_skipped_scan"].GetBool(),
+				procInfoObject["blocked_reason"].GetString(),
+				procInfoObject["profile"].GetString(),
+				procInfoObject["result"].GetString(),
+				procInfoObject["user_agent"].GetString());
+		}
+		catch(MDException& e)
+		{
+			throw MDParsingException(e.what(), batchResultJSON);
+		}
+	}
+
+	MDBatchResult() {}
+
+	std::string batchId;
+	bool isClosed;
+	std::string userData;
+	std::unique_ptr<MDBaseScanResult> scanResult;
+	std::unique_ptr<MDBaseProcessInfo> processInfo;
+	std::unique_ptr<MDBatchFiles> batchFiles;
 };
 
 };
