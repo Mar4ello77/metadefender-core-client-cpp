@@ -6,9 +6,9 @@ std::unique_ptr<Opswat::MDFileInfo> DefRespObjectCreator::getFileInfoObject()
 	return Opswat::Utils::make_unique<Opswat::MDFileInfo>(1337, "test.txt", "text/plain", "ASCII text", "md5val", "sha1val", "sha256", "2016-09-08");
 }
 
-std::unique_ptr<Opswat::MDProcessInfo> DefRespObjectCreator::getProcessInfoObject()
+std::unique_ptr<Opswat::MDExtendedProcessInfo> DefRespObjectCreator::getExtendedProcessInfoObject()
 {
-	auto processInfo = Opswat::Utils::make_unique<Opswat::MDProcessInfo>(false, "", "File scan", 100, "Allowed", "webscan");
+	auto processInfo = Opswat::Utils::make_unique<Opswat::MDExtendedProcessInfo>(false, "", "File scan", 100, "Allowed", "webscan");
 	processInfo->postProcessInfo = getPostProcessInfoObject();
 	return processInfo;
 }
@@ -18,9 +18,9 @@ std::unique_ptr<Opswat::MDPostProcessInfo> DefRespObjectCreator::getPostProcessI
 	return Opswat::Utils::make_unique<Opswat::MDPostProcessInfo>("", "", "", "", "");
 }
 
-std::unique_ptr<Opswat::MDScanResult> DefRespObjectCreator::getScanResultObject()
+std::unique_ptr<Opswat::MDExtendedScanResult> DefRespObjectCreator::getExtendedScanResultObject()
 {
-	auto scanResult = Opswat::Utils::make_unique<Opswat::MDScanResult>("456", 100, "No threat detected", 0, "2016-09-08", 2, 567);
+	auto scanResult = Opswat::Utils::make_unique<Opswat::MDExtendedScanResult>("456", 100, "No threat detected", 0, "2016-09-08", 2, 567);
 	scanResult->scanDetails["Engine1"] = getEngineScanResultObject();
 	scanResult->scanDetails["Engine2"] = getEngineScanResultObject();
 	scanResult->scanDetails["Engine2"]->engineName = "Engine2";

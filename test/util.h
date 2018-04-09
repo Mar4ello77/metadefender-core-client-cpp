@@ -6,13 +6,19 @@
 
 bool operator==(const Opswat::MDFileScanResult &a, const Opswat::MDFileScanResult &b);
 bool operator==(const Opswat::MDFileInfo &a, const Opswat::MDFileInfo &b);
-bool operator==(const Opswat::MDProcessInfo &a, const Opswat::MDProcessInfo &b);
+bool operator==(const Opswat::MDExtendedProcessInfo &a, const Opswat::MDExtendedProcessInfo &b);
 bool operator==(const Opswat::MDPostProcessInfo &a, const Opswat::MDPostProcessInfo &b);
-bool operator==(const Opswat::MDScanResult &a, const Opswat::MDScanResult &b);
+bool operator==(const Opswat::MDExtendedScanResult &a, const Opswat::MDExtendedScanResult &b);
 bool operator==(const Opswat::MDExtractedFileInfo &a, const Opswat::MDExtractedFileInfo &b);
 bool operator==(const Opswat::MDEngineScanResult &a, const Opswat::MDEngineScanResult &b);
 bool operator==(const Opswat::MDEngineInfo &a, const Opswat::MDEngineInfo &b);
 bool operator==(const Opswat::MDScanRuleInfo &a, const Opswat::MDScanRuleInfo &b);
+bool operator==(const Opswat::MDBatchResult &a, const Opswat::MDBatchResult &b);
+bool operator==(const Opswat::MDBaseProcessInfo &a, const Opswat::MDBaseProcessInfo &b);
+bool operator==(const Opswat::MDBaseScanResult &a, const Opswat::MDBaseScanResult &b);
+bool operator==(const Opswat::MDBatchFiles &a, const Opswat::MDBatchFiles &b);
+bool operator==(const Opswat::MDFileInBatch &a, const Opswat::MDFileInBatch &b);
+bool operator==(const Opswat::MDBatchFileProcessInfo &a, const Opswat::MDBatchFileProcessInfo &b);
 
 template<typename T>
 bool equal(const std::unique_ptr<T> &a, const std::unique_ptr<T> &b)

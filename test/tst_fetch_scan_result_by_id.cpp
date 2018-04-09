@@ -45,8 +45,8 @@ TEST_F(TestFetchScanResultById, OkStatusWithEveryField)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 	std::vector<std::unique_ptr<Opswat::MDExtractedFileInfo>> extractedFileInfos;
 	auto extracted1 = DefRespObjectCreator::getExtractedFileInfoObject();
 	auto extracted2 = DefRespObjectCreator::getExtractedFileInfoObject();
@@ -78,8 +78,8 @@ TEST_F(TestFetchScanResultById, OkStatusWithEveryField)
 TEST_F(TestFetchScanResultById, OkStatusWithMissingFileInfo)
 {
 	std::string dataId = "123";
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 	std::vector<std::unique_ptr<Opswat::MDExtractedFileInfo>> extractedFileInfos;
 	auto extracted1 = DefRespObjectCreator::getExtractedFileInfoObject();
 	auto extracted2 = DefRespObjectCreator::getExtractedFileInfoObject();
@@ -106,8 +106,8 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingExtractedFiles)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 
 	JsonBuilder builder;
 	builder.addDataId(dataId);
@@ -132,7 +132,7 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingProcessInfo)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 
 	JsonBuilder builder;
 	builder.addDataId(dataId);
@@ -152,9 +152,9 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingPostProcessing)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
 	processInfoObj->postProcessInfo.release();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 
 	JsonBuilder builder;
 	builder.addDataId(dataId);
@@ -179,7 +179,7 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResult)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
 
 	JsonBuilder builder;
 	builder.addDataId(dataId);
@@ -202,8 +202,8 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResultDetails)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 	scanResultsObj->numEngines = 0;
 	scanResultsObj->scanDetails.clear();
 
@@ -226,8 +226,8 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResultDetailsFields)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 
 	JsonBuilder builder;
 	builder.addDataId(dataId);
@@ -260,8 +260,8 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingScanResultDetailsFields)
 TEST_F(TestFetchScanResultById, OkStatusWithMissingDataId)
 {
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 
 	JsonBuilder builder;
 	builder.addFileInfo(fileInfoObj);
@@ -281,8 +281,8 @@ TEST_F(TestFetchScanResultById, OkStatusWithMissingChildField)
 {
 	std::string dataId = "123";
 	auto fileInfoObj = DefRespObjectCreator::getFileInfoObject();
-	auto processInfoObj = DefRespObjectCreator::getProcessInfoObject();
-	auto scanResultsObj = DefRespObjectCreator::getScanResultObject();
+	auto processInfoObj = DefRespObjectCreator::getExtendedProcessInfoObject();
+	auto scanResultsObj = DefRespObjectCreator::getExtendedScanResultObject();
 
 	JsonBuilder builder;
 	builder.addDataId(dataId);

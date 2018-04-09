@@ -17,8 +17,8 @@ public:
 	void addDataId(const std::string &dataId);
 	void addExtractedFiles(std::vector<std::unique_ptr<Opswat::MDExtractedFileInfo>> &extractedFileInfo);
 	void addFileInfo(const std::unique_ptr<Opswat::MDFileInfo> &fileInfo);
-	void addScanResults(const std::unique_ptr<Opswat::MDScanResult> &scanResult, bool lowVisibility = false);
-	void addProcessInfo(const std::unique_ptr<Opswat::MDProcessInfo> &processInfo);
+	void addScanResults(const std::unique_ptr<Opswat::MDExtendedScanResult> &scanResult, bool lowVisibility = false);
+	void addProcessInfo(const std::unique_ptr<Opswat::MDExtendedProcessInfo> &processInfo);
 	void addEngineInfos(std::vector<std::unique_ptr<Opswat::MDEngineInfo>> &engineInfos);
 	void addScanRules(const std::vector<std::unique_ptr<Opswat::MDScanRuleInfo>> &scanRules);
 

@@ -13,6 +13,7 @@ link_directories(${GTEST_LIBRARY_DIR})
 add_executable(test-mdrestclient
 	def_resp_object_creator.cpp
 	json_builder.cpp
+	batch_json_builder.cpp
 	mock_http_client.cpp
 	tst_create_session.cpp
 	tst_destroy_session.cpp
@@ -27,6 +28,11 @@ add_executable(test-mdrestclient
 	tst_version_info.cpp
 	tst_fetch_available_scan_rules.cpp
 	tst_cancel_scan_by_id.cpp
+	tst_init_batch.cpp
+	tst_cancel_batch.cpp
+	tst_close_batch.cpp
+	tst_fetch_batch_scan_result.cpp
+	tst_scan_file_in_batch.cpp
 	util.cpp
 )
 
