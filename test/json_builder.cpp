@@ -27,8 +27,8 @@ void JsonBuilder::createFileScanResult()
 	extractedFileInfos.back()->displayName = "turtle";
 	addExtractedFiles(extractedFileInfos);
 	addFileInfo(DefRespObjectCreator::getFileInfoObject());
-	addScanResults(DefRespObjectCreator::getScanResultObject());
-	addProcessInfo(DefRespObjectCreator::getProcessInfoObject());
+	addScanResults(DefRespObjectCreator::getExtendedScanResultObject());
+	addProcessInfo(DefRespObjectCreator::getExtendedProcessInfoObject());
 }
 
 void JsonBuilder::addDataId(const std::string& dataId)
@@ -72,10 +72,10 @@ void JsonBuilder::addFileInfo(const std::unique_ptr<Opswat::MDFileInfo> &fileInf
 	doc_.AddMember("file_info", fileInfoValue, doc_.GetAllocator());
 }
 
-void JsonBuilder::addScanResults(const std::unique_ptr<Opswat::MDScanResult> &scanResult, bool lowVisibility)
+void JsonBuilder::addScanResults(const std::unique_ptr<Opswat::MDExtendedScanResult> &scanResult, bool lowVisibility)
 {
 	rapidjson::Value scanResultValue(rapidjson::kObjectType);
-	scanResultValue.AddMember("data_id", scanResult->dataId, doc_.GetAllocator());
+	scanResultValue.AddMember("data_id", scanResult->id, doc_.GetAllocator());
 	scanResultValue.AddMember("progress_percentage", scanResult->processPercentage, doc_.GetAllocator());
 	scanResultValue.AddMember("scan_all_result_a", scanResult->scanAllResultDesc, doc_.GetAllocator());
 	scanResultValue.AddMember("scan_all_result_i", scanResult->scanAllResultCode, doc_.GetAllocator());
@@ -103,7 +103,7 @@ void JsonBuilder::addScanResults(const std::unique_ptr<Opswat::MDScanResult> &sc
 	doc_.AddMember("scan_results", scanResultValue, doc_.GetAllocator());
 }
 
-void JsonBuilder::addProcessInfo(const std::unique_ptr<Opswat::MDProcessInfo> &processInfo)
+void JsonBuilder::addProcessInfo(const std::unique_ptr<Opswat::MDExtendedProcessInfo> &processInfo)
 {
 	rapidjson::Value processInfoValue(rapidjson::kObjectType);
 	if (processInfo->postProcessInfo)

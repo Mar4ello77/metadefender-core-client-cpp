@@ -21,7 +21,7 @@ bool operator==(const Opswat::MDFileInfo &a, const Opswat::MDFileInfo &b)
 		a.uploadDate == b.uploadDate;
 }
 
-bool operator==(const Opswat::MDProcessInfo &a, const Opswat::MDProcessInfo &b)
+bool operator==(const Opswat::MDExtendedProcessInfo &a, const Opswat::MDExtendedProcessInfo &b)
 {
 	return a.blockedReason == b.blockedReason &&
 		equal(a.postProcessInfo, b.postProcessInfo) &&
@@ -41,7 +41,7 @@ bool operator==(const Opswat::MDPostProcessInfo &a, const Opswat::MDPostProcessI
 		a.copyMoveDestination == b.copyMoveDestination;
 }
 
-bool operator==(const Opswat::MDScanResult &a, const Opswat::MDScanResult &b)
+bool operator==(const Opswat::MDExtendedScanResult &a, const Opswat::MDExtendedScanResult &b)
 {
 	return a.numEngines == b.numEngines &&
 		a.processPercentage == b.processPercentage &&
@@ -50,7 +50,7 @@ bool operator==(const Opswat::MDScanResult &a, const Opswat::MDScanResult &b)
 		a.scanDuration == b.scanDuration &&
 		a.startDate == b.startDate &&
 		equal(a.scanDetails, b.scanDetails) &&
-		a.dataId == b.dataId;
+		a.id == b.id;
 }
 
 bool operator==(const Opswat::MDExtractedFileInfo &a, const Opswat::MDExtractedFileInfo &b)
@@ -95,4 +95,63 @@ bool operator==(const Opswat::MDScanRuleInfo &a, const Opswat::MDScanRuleInfo &b
 {
 	return a.name == b.name &&
 		a.maxFileSize == b.maxFileSize;
+}
+
+bool operator==(const Opswat::MDBatchResult &a, const Opswat::MDBatchResult &b)
+{
+	return a.batchId == b.batchId &&
+		a.isClosed == b.isClosed &&
+		a.userData == b.userData &&
+		equal(a.processInfo, b.processInfo) &&
+		equal(a.scanResult, b.scanResult) &&
+		equal(a.batchFiles, b.batchFiles);
+}
+
+bool operator==(const Opswat::MDBaseProcessInfo &a, const Opswat::MDBaseProcessInfo &b)
+{
+	return a.blockedReason == b.blockedReason &&
+		a.profile == b.profile &&
+		a.result == b.result &&
+		a.skippedFileType == b.skippedFileType &&
+		a.userAgent == b.userAgent;
+}
+
+bool operator==(const Opswat::MDBaseScanResult &a, const Opswat::MDBaseScanResult &b)
+{
+	return a.id == b.id &&
+		a.scanAllResultDesc == b.scanAllResultDesc &&
+		a.scanAllResultCode == b.scanAllResultCode &&
+		a.startDate == b.startDate &&
+		a.numEngines == b.numEngines &&
+		a.scanDuration == b.scanDuration;
+}
+
+bool operator==(const Opswat::MDBatchFiles &a, const Opswat::MDBatchFiles &b)
+{
+	return a.batchCount == b.batchCount &&
+		a.firstIndex == b.firstIndex &&
+		a.pageSize == b.pageSize &&
+		equal(a.filesInBatch, b.filesInBatch);
+}
+
+bool operator==(const Opswat::MDFileInBatch &a, const Opswat::MDFileInBatch &b)
+{
+	return a.dataId == b.dataId &&
+		a.detectedBy == b.detectedBy &&
+		a.displayName == b.displayName &&
+		a.fileSize == b.fileSize &&
+		a.fileType == b.fileType &&
+		a.fileTypeDesc == b.fileTypeDesc &&
+		equal(a.processInfo, b.processInfo) &&
+		a.progressPercentage == b.progressPercentage &&
+		a.scanAllResultDesc == b.scanAllResultDesc &&
+		a.scanAllResultCode == b.scanAllResultCode &&
+		a.scannedWith == b.scannedWith;
+}
+
+bool operator==(const Opswat::MDBatchFileProcessInfo &a, const Opswat::MDBatchFileProcessInfo &b)
+{
+	return a.blockedReason == b.blockedReason &&
+		a.progressPercentage == b.progressPercentage &&
+		a.result == b.result;
 }

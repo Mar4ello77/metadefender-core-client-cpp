@@ -113,6 +113,54 @@ public:
 	/// @return String holding the sanitized content
 	void fetchSanitizedFileById(const std::string& dataId, std::ostream& outStream);
 
+	/// @brief Init batch scan
+	///
+	/// Starts a new batch scan. File scans can be attached to this batch, by using the
+	/// batch id, which is returned by this function.
+	///
+	/// @param userData Additional custom information
+	/// @param rule Rule for this batch
+	/// @param userAgent client's identification
+	/// @return Structure holding the batch id
+	std::unique_ptr<MDResponse<MDInitBatch>> initBatch(const std::string& userData = {}, const std::string& rule = {}, const std::string& userAgent = {});
+
+	/// @brief Close batch
+	///
+	/// Closes a previously initiated batch scan. After calling this function, no further file scan can be issued by using
+	/// this batch id.
+	///
+	/// @param batchId Identifier for a previously initiated batch
+	/// @return Structure holding the information returned for this batch id
+	std::unique_ptr<MDResponse<MDBatchResult>> closeBatch(const std::string& batchId);
+
+	/// @brief Cancel batch
+	///
+	/// Cancels the processing of a batch. The attached scans, which are still in progress will be cancelled also.
+	///
+	/// @param batchId Identifier for a previously initiated batch
+	void cancelBatch(const std::string& batchId);
+
+	/// @brief Initiate a batched file scan
+	/// 
+	/// Initiate a new file scan and attach it to a previously initiated batch. The result of this scan will contribute to the
+	/// overall result of the batch, however it can be still fetched separatly.
+	///
+	/// @param inStream Stream to read the content from
+	/// @param batchId Identifier of a previously initiated batch
+	/// @param filename Display name
+	/// @param archivePwd Password for archive file
+	/// @return Structure holding the identifier for the initiated scan
+	std::unique_ptr<MDResponse<MDFileScanId>> scanFileInBatch(std::istream& inStream, const std::string& batchId, const std::string& filename = {}, const std::string& archivePwd = {});
+
+	/// @brief Fetch batch status
+	///
+	/// Fetches the status of a previously initiated batch. The result is aggregated from the results of the file scans, which were 
+	/// attached to this batch.
+	///
+	/// @param batchId Identifier of a batch
+	/// @return Overall result of the batch
+	std::unique_ptr<MDResponse<MDBatchResult>> fetchBatchScanResult(const std::string& batchId);
+
 	/// @brief Fetch the Metadefender server's version
 	/// 
 	/// Fetches the version information of the Metadefender server. It requires a valid
@@ -201,12 +249,14 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanLocalFile(con
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file";
-	request.headers = std::map<std::string, std::string>{{"filepath", filePath},
-	{"filename", fileName},
-	{"user_agent", userAgent},
-	{"rule", rule},
-	{"archivepwd", archivePwd},
-	{"apikey", apiKey_}};
+	request.headers = std::map<std::string, std::string>{
+		{"filepath", filePath},
+		{"filename", fileName},
+		{"user_agent", userAgent},
+		{"rule", rule},
+		{"archivepwd", archivePwd},
+		{"apikey", apiKey_}
+	};
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -226,11 +276,13 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFile(std::ist
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file";
-	request.headers = std::map<std::string, std::string>{{"filename", fileName},
-	{ "user_agent", userAgent },
-	{ "rule", rule },
-	{ "archivepwd", archivePwd },
-	{ "apikey", apiKey_}};
+	request.headers = std::map<std::string, std::string>{
+		{"filename", fileName},
+		{"user_agent", userAgent},
+		{"rule", rule},
+		{"archivepwd", archivePwd},
+		{"apikey", apiKey_}
+	};
 	request.inStream = &inStream;
 	
 	auto response = session_->sendRequest(request);
@@ -316,6 +368,92 @@ void MDRest<HttpSession>::fetchSanitizedFileById(const std::string& dataId, std:
 	auto response = session_->sendRequest(request, outStream);
 
 	checkResponse(*response);
+}
+
+template<typename HttpSession>
+std::unique_ptr<MDResponse<MDInitBatch>> MDRest<HttpSession>::initBatch(const std::string& userData, const std::string& rule, const std::string& userAgent)
+{
+	MDHttpRequest request;
+	request.method = HTTP_METHOD::HTTP_POST;
+	request.url = "/file/batch";
+	request.headers = std::map<std::string, std::string>{
+		{"apikey", apiKey_},
+		{"user_agent", userAgent},
+		{"rule", rule},
+		{"user-data", userData}
+	};
+	request.inStream = nullptr;
+
+	auto response = session_->sendRequest(request);
+
+	checkResponse(*response);
+
+	return Utils::make_unique<MDResponse<MDInitBatch>>(response->body);
+}
+
+template<typename HttpSession>
+std::unique_ptr<MDResponse<MDBatchResult>> MDRest<HttpSession>::closeBatch(const std::string& batchId)
+{
+	MDHttpRequest request;
+	request.method = HTTP_METHOD::HTTP_POST;
+	request.url = "/file/batch/" + batchId + "/close";
+	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.inStream = nullptr;
+
+	auto response = session_->sendRequest(request);
+
+	checkResponse(*response);
+
+	return Utils::make_unique<MDResponse<MDBatchResult>>(response->body);
+}
+
+template<typename HttpSession>
+void MDRest<HttpSession>::cancelBatch(const std::string& batchId)
+{
+	MDHttpRequest request;
+	request.method = HTTP_METHOD::HTTP_POST;
+	request.url = "/file/batch/" + batchId + "/cancel";
+	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.inStream = nullptr;
+
+	auto response = session_->sendRequest(request);
+
+	checkResponse(*response);
+}
+
+template<typename HttpSession>
+std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(std::istream& inStream, const std::string& batchId, const std::string& filename, const std::string& archivePwd)
+{
+	MDHttpRequest request;
+	request.method = HTTP_METHOD::HTTP_POST;
+	request.url = "/file";
+	request.headers = std::map<std::string, std::string>{
+		{"filename", filename},
+		{"archivepwd", archivePwd},
+		{"batch", batchId}
+	};
+	request.inStream = &inStream;
+	
+	auto response = session_->sendRequest(request);
+
+	checkResponse(*response);
+
+	return Utils::make_unique<MDResponse<MDFileScanId>>(response->body);
+}
+
+template<typename HttpSession>
+std::unique_ptr<MDResponse<MDBatchResult>> MDRest<HttpSession>::fetchBatchScanResult(const std::string& batchId)
+{
+	MDHttpRequest request;
+	request.method = HTTP_METHOD::HTTP_GET;
+	request.url = "/file/batch/" + batchId;
+	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+
+	auto response = session_->sendRequest(request);
+
+	checkResponse(*response);
+
+	return Utils::make_unique<MDResponse<MDBatchResult>>(response->body);
 }
 
 template<typename HttpSession>
