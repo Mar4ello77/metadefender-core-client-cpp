@@ -122,7 +122,7 @@ public:
 	/// @param rule Rule for this batch
 	/// @param userAgent client's identification
 	/// @return Structure holding the batch id
-	std::unique_ptr<MDResponse<MDInitBatch>> initBatch(const std::string& userData = {}, const std::string& rule = {}, const std::string& userAgent = {});
+	std::unique_ptr<MDResponse<MDInitBatch>> initBatch(const std::string& userData = std::string(), const std::string& rule = std::string(), const std::string& userAgent = std::string());
 
 	/// @brief Close batch
 	///
@@ -150,7 +150,7 @@ public:
 	/// @param filename Display name
 	/// @param archivePwd Password for archive file
 	/// @return Structure holding the identifier for the initiated scan
-	std::unique_ptr<MDResponse<MDFileScanId>> scanFileInBatch(std::istream& inStream, const std::string& batchId, const std::string& filename = {}, const std::string& archivePwd = {});
+	std::unique_ptr<MDResponse<MDFileScanId>> scanFileInBatch(std::istream& inStream, const std::string& batchId, const std::string& filename = std::string(), const std::string& archivePwd = std::string());
 
 	/// @brief Fetch batch status
 	///
@@ -430,7 +430,8 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(s
 	request.headers = std::map<std::string, std::string>{
 		{"filename", filename},
 		{"archivepwd", archivePwd},
-		{"batch", batchId}
+		{"batch", batchId},
+		{"apikey", apiKey_}
 	};
 	request.inStream = &inStream;
 	
