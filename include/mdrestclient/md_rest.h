@@ -430,7 +430,8 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(s
 	request.headers = std::map<std::string, std::string>{
 		{"filename", filename},
 		{"archivepwd", archivePwd},
-		{"batch", batchId}
+		{"batch", batchId},
+		{"apikey", apiKey_}
 	};
 	request.inStream = &inStream;
 	
