@@ -24,6 +24,9 @@ template<typename HttpSession>
 class MDRest
 {
 public:
+	using Headers = std::map<std::string, std::string>;
+
+public:
 
 	/// @brief Constructor
 	/// 
@@ -45,12 +48,15 @@ public:
 	/// @param userAgent Client's identification
 	/// @param rule Name of the selected rule
 	/// @param archivePwd Password for archive file
+	/// @param customHeaders Additional headers
 	/// @return Structure holding the returned Id for the initiated scan
 	std::unique_ptr<MDResponse<MDFileScanId>> scanLocalFile(const std::string& filePath,
 		const std::string& fileName = std::string(),
 		const std::string& userAgent = std::string(),
 		const std::string& rule = std::string(),
-		const std::string& archivePwd = std::string());
+		const std::string& archivePwd = std::string(),
+		const Headers &customHeaders = Headers()
+	);
 
 	/// @brief Scan file
 	/// 
@@ -61,12 +67,15 @@ public:
 	/// @param userAgent Client's identification
 	/// @param rule Name of the selected rule
 	/// @param archivePwd Password for archive file
+	/// @param customHeaders Additional headers
 	/// @return Structure holding the returned Id for the initiated scan
 	std::unique_ptr<MDResponse<MDFileScanId>> scanFile(std::istream& inStream,
 		const std::string& fileName = std::string(),
 		const std::string& userAgent = std::string(),
 		const std::string& rule = std::string(),
-		const std::string& archivePwd = std::string());
+		const std::string& archivePwd = std::string(),
+		const Headers &customHeaders = Headers()
+	);
 
 	/// @brief Cancel scan by id
 	///
@@ -149,8 +158,14 @@ public:
 	/// @param batchId Identifier of a previously initiated batch
 	/// @param filename Display name
 	/// @param archivePwd Password for archive file
+	/// @param customHeaders Additional headers
 	/// @return Structure holding the identifier for the initiated scan
-	std::unique_ptr<MDResponse<MDFileScanId>> scanFileInBatch(std::istream& inStream, const std::string& batchId, const std::string& filename = std::string(), const std::string& archivePwd = std::string());
+	std::unique_ptr<MDResponse<MDFileScanId>> scanFileInBatch(std::istream& inStream, 
+		const std::string& batchId, 
+		const std::string& filename = std::string(), 
+		const std::string& archivePwd = std::string(),
+		const Headers &customHeaders = Headers()
+	);
 
 	/// @brief Fetch batch status
 	///
@@ -244,12 +259,13 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanLocalFile(con
 																			const std::string& fileName,
 																			const std::string& userAgent,
 																			const std::string& rule,
-																			const std::string& archivePwd)
+																			const std::string& archivePwd,
+																			const Headers &customHeaders)
 {
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file";
-	request.headers = std::map<std::string, std::string>{
+	request.headers = Headers{
 		{"filepath", filePath},
 		{"filename", fileName},
 		{"user_agent", userAgent},
@@ -257,6 +273,7 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanLocalFile(con
 		{"archivepwd", archivePwd},
 		{"apikey", apiKey_}
 	};
+	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -271,18 +288,20 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFile(std::ist
 																		const std::string& fileName,
 																		const std::string& userAgent,
 																		const std::string& rule,
-																		const std::string& archivePwd)
+																		const std::string& archivePwd,
+																		const Headers &customHeaders)
 {		
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file";
-	request.headers = std::map<std::string, std::string>{
+	request.headers = Headers{
 		{"filename", fileName},
 		{"user_agent", userAgent},
 		{"rule", rule},
 		{"archivepwd", archivePwd},
 		{"apikey", apiKey_}
 	};
+	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = &inStream;
 	
 	auto response = session_->sendRequest(request);
@@ -298,7 +317,7 @@ std::string MDRest<HttpSession>::cancelScanById(const std::string& dataId)
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file/" + dataId + "/cancel";
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -314,7 +333,7 @@ std::unique_ptr<MDResponse<MDFileScanResult>> MDRest<HttpSession>::fetchScanResu
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/" + dataId;
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -330,7 +349,7 @@ std::unique_ptr<MDResponse<MDFileScanResult>> MDRest<HttpSession>::fetchScanResu
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/hash/" + hash;
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -346,7 +365,7 @@ std::string MDRest<HttpSession>::fetchSanitizedFileById(const std::string& dataI
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/converted/" + dataId;
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -362,7 +381,7 @@ void MDRest<HttpSession>::fetchSanitizedFileById(const std::string& dataId, std:
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/converted/" + dataId;
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request, outStream);
@@ -376,7 +395,7 @@ std::unique_ptr<MDResponse<MDInitBatch>> MDRest<HttpSession>::initBatch(const st
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file/batch";
-	request.headers = std::map<std::string, std::string>{
+	request.headers = Headers{
 		{"apikey", apiKey_},
 		{"user_agent", userAgent},
 		{"rule", rule},
@@ -397,7 +416,7 @@ std::unique_ptr<MDResponse<MDBatchResult>> MDRest<HttpSession>::closeBatch(const
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file/batch/" + batchId + "/close";
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -413,7 +432,7 @@ void MDRest<HttpSession>::cancelBatch(const std::string& batchId)
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file/batch/" + batchId + "/cancel";
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -422,17 +441,22 @@ void MDRest<HttpSession>::cancelBatch(const std::string& batchId)
 }
 
 template<typename HttpSession>
-std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(std::istream& inStream, const std::string& batchId, const std::string& filename, const std::string& archivePwd)
+std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(std::istream& inStream, 
+																			   const std::string& batchId, 
+																			   const std::string& filename, 
+																			   const std::string& archivePwd,
+																			   const Headers &customHeaders)
 {
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file";
-	request.headers = std::map<std::string, std::string>{
+	request.headers = Headers{
 		{"filename", filename},
 		{"archivepwd", archivePwd},
 		{"batch", batchId},
 		{"apikey", apiKey_}
 	};
+	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = &inStream;
 	
 	auto response = session_->sendRequest(request);
@@ -448,7 +472,7 @@ std::unique_ptr<MDResponse<MDBatchResult>> MDRest<HttpSession>::fetchBatchScanRe
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/batch/" + batchId;
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 
 	auto response = session_->sendRequest(request);
 
@@ -463,7 +487,7 @@ std::unique_ptr<MDResponse<MDVersionInfo>> MDRest<HttpSession>::getVersionInfo()
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/version";
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -479,7 +503,7 @@ std::unique_ptr<MDResponse<MDLicenseInfo>> MDRest<HttpSession>::getLicenseInfo()
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/admin/license";
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -512,7 +536,7 @@ std::unique_ptr<MDResponse<MDLogoutInfo>> MDRest<HttpSession>::destroySession(co
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/logout";
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey}};
+	request.headers = Headers{{"apikey", apiKey}};
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -528,7 +552,7 @@ std::unique_ptr<MDResponse<MDEnginesList>> MDRest<HttpSession>::getEngineInfo()
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/stat/engines";
-	request.headers = std::map<std::string, std::string>{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
 	
 	auto response = session_->sendRequest(request);
@@ -550,7 +574,7 @@ std::unique_ptr <MDResponse<MDAvailableScanRules>> MDRest<HttpSession>::fetchAva
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/rules";
-	request.headers = std::map<std::string, std::string> {
+	request.headers = Headers {
 		{"apikey", apiKey_},
 		{"user_agent", userAgent}
 	};

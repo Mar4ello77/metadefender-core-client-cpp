@@ -194,15 +194,22 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 		{
 			std::string header = i.first;
 			header += ": ";
-			char* urlEncoded = curl_easy_escape(curl_, i.second.c_str(), static_cast<int>(i.second.size()));
-			if(!urlEncoded)
+			if (i.first == "User-Agent") 
 			{
 				header += i.second;
-			}
-			else
+			} 
+			else 
 			{
-				header += std::string(urlEncoded);
-				curl_free(urlEncoded);
+				char* urlEncoded = curl_easy_escape(curl_, i.second.c_str(), static_cast<int>(i.second.size()));
+				if(!urlEncoded)
+				{
+					header += i.second;
+				}
+				else
+				{
+					header += std::string(urlEncoded);
+					curl_free(urlEncoded);
+				}
 			}
 			auto tempList = curl_slist_append(slist, header.c_str());
 			if(tempList)
