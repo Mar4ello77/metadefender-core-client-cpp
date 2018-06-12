@@ -235,6 +235,9 @@ public:
 	/// @return Structure holding the returned engine informations
 	std::unique_ptr<MDResponse<MDEnginesList>> getEngineInfo();
 
+	void setCookie(const std::string cookie) { cookie_ = cookie; }
+	std::string getCookie() { return cookie_; }
+
 private:
 	void checkResponse(const MDHttpResponse& response) const;
 
@@ -242,6 +245,7 @@ private:
 
 	std::unique_ptr<HttpSession> session_;
 	std::string apiKey_;
+	std::string cookie_;
 };
 
 template<typename HttpSession>
@@ -271,7 +275,8 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanLocalFile(con
 		{"user_agent", userAgent},
 		{"rule", rule},
 		{"archivepwd", archivePwd},
-		{"apikey", apiKey_}
+		{"apikey", apiKey_},
+		{"Cookie", cookie_}
 	};
 	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = nullptr;
@@ -279,6 +284,10 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanLocalFile(con
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
+
+	if (!response->cookie.empty()) {
+		cookie_ = response->cookie;
+	}
 
 	return Utils::make_unique<MDResponse<MDFileScanId>>(response->body);
 }
@@ -299,7 +308,8 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFile(std::ist
 		{"user_agent", userAgent},
 		{"rule", rule},
 		{"archivepwd", archivePwd},
-		{"apikey", apiKey_}
+		{"apikey", apiKey_},
+		{"Cookie", cookie_}
 	};
 	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = &inStream;
@@ -307,6 +317,10 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFile(std::ist
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
+
+	if (!response->cookie.empty()) {
+		cookie_ = response->cookie;
+	}
 
 	return Utils::make_unique<MDResponse<MDFileScanId>>(response->body);
 }
@@ -317,7 +331,7 @@ std::string MDRest<HttpSession>::cancelScanById(const std::string& dataId)
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file/" + dataId + "/cancel";
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -333,7 +347,7 @@ std::unique_ptr<MDResponse<MDFileScanResult>> MDRest<HttpSession>::fetchScanResu
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/" + dataId;
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -349,7 +363,7 @@ std::unique_ptr<MDResponse<MDFileScanResult>> MDRest<HttpSession>::fetchScanResu
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/hash/" + hash;
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -365,7 +379,7 @@ std::string MDRest<HttpSession>::fetchSanitizedFileById(const std::string& dataI
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/converted/" + dataId;
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -381,7 +395,7 @@ void MDRest<HttpSession>::fetchSanitizedFileById(const std::string& dataId, std:
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/converted/" + dataId;
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request, outStream);
@@ -397,6 +411,7 @@ std::unique_ptr<MDResponse<MDInitBatch>> MDRest<HttpSession>::initBatch(const st
 	request.url = "/file/batch";
 	request.headers = Headers{
 		{"apikey", apiKey_},
+		{"Cookie", cookie_},
 		{"user_agent", userAgent},
 		{"rule", rule},
 		{"user-data", userData}
@@ -407,6 +422,10 @@ std::unique_ptr<MDResponse<MDInitBatch>> MDRest<HttpSession>::initBatch(const st
 
 	checkResponse(*response);
 
+	if (!response->cookie.empty()) {
+		cookie_ = response->cookie;
+	}
+
 	return Utils::make_unique<MDResponse<MDInitBatch>>(response->body);
 }
 
@@ -416,7 +435,7 @@ std::unique_ptr<MDResponse<MDBatchResult>> MDRest<HttpSession>::closeBatch(const
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file/batch/" + batchId + "/close";
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -432,7 +451,7 @@ void MDRest<HttpSession>::cancelBatch(const std::string& batchId)
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file/batch/" + batchId + "/cancel";
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -454,7 +473,8 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(s
 		{"filename", filename},
 		{"archivepwd", archivePwd},
 		{"batch", batchId},
-		{"apikey", apiKey_}
+		{"apikey", apiKey_},
+		{"Cookie", cookie_}
 	};
 	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = &inStream;
@@ -472,7 +492,7 @@ std::unique_ptr<MDResponse<MDBatchResult>> MDRest<HttpSession>::fetchBatchScanRe
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/file/batch/" + batchId;
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 
 	auto response = session_->sendRequest(request);
 
@@ -487,7 +507,7 @@ std::unique_ptr<MDResponse<MDVersionInfo>> MDRest<HttpSession>::getVersionInfo()
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/version";
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -503,7 +523,7 @@ std::unique_ptr<MDResponse<MDLicenseInfo>> MDRest<HttpSession>::getLicenseInfo()
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/admin/license";
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -522,6 +542,7 @@ std::unique_ptr <MDResponse<MDLoginInfo>> MDRest<HttpSession>::createSession(con
 	std::string body = "{\"user\":\"" + userName + "\",\"password\":\"" + password + "\"}";
 	std::istringstream iss(body);
 	request.inStream = &iss;
+	request.headers = Headers{{"Cookie", cookie_}};
 
 	auto response = session_->sendRequest(request);
 
@@ -536,7 +557,7 @@ std::unique_ptr<MDResponse<MDLogoutInfo>> MDRest<HttpSession>::destroySession(co
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/logout";
-	request.headers = Headers{{"apikey", apiKey}};
+	request.headers = Headers{{"apikey", apiKey}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -552,7 +573,7 @@ std::unique_ptr<MDResponse<MDEnginesList>> MDRest<HttpSession>::getEngineInfo()
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_GET;
 	request.url = "/stat/engines";
-	request.headers = Headers{{"apikey", apiKey_}};
+	request.headers = Headers{{"apikey", apiKey_}, {"Cookie", cookie_}};
 	request.inStream = nullptr;
 
 	auto response = session_->sendRequest(request);
@@ -576,6 +597,7 @@ std::unique_ptr <MDResponse<MDAvailableScanRules>> MDRest<HttpSession>::fetchAva
 	request.url = "/file/rules";
 	request.headers = Headers {
 		{"apikey", apiKey_},
+		{"Cookie", cookie_},
 		{"user_agent", userAgent}
 	};
 	request.inStream = nullptr;
