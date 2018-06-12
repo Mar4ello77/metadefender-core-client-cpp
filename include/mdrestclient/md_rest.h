@@ -16,7 +16,7 @@ namespace Opswat
 /// @brief Metadefender Rest connection
 ///
 /// It represents a connection to Metadefender Rest server. The connection's traits
-///	(e.g.: security, persistency, thread-safety) determined by the HttpSession 
+///	(e.g.: security, persistency, thread-safety) determined by the HttpSession
 ///	template parameter.
 ///
 /// @tparam HttpSession Session type
@@ -29,9 +29,9 @@ public:
 public:
 
 	/// @brief Constructor
-	/// 
+	///
 	/// Takes ownership over session passed in, and uses it to initiate rest requests.
-	/// 
+	///
 	/// @param session The session MDRest can use for connection to Metadefender Rest
 	MDRest(std::unique_ptr<HttpSession> session);
 
@@ -39,7 +39,7 @@ public:
 	~MDRest();
 
 	/// @brief Scan local file
-	/// 
+	///
 	/// Creates and sends rest request to scan a local file. Local file scanning has
 	/// to be enabled on Metadefender side.
 	///
@@ -59,8 +59,8 @@ public:
 	);
 
 	/// @brief Scan file
-	/// 
-	/// Creates and sends rest request to scan a file. 
+	///
+	/// Creates and sends rest request to scan a file.
 	///
 	/// @param inStream Stream to read the content from
 	/// @param fileName Display name
@@ -85,7 +85,7 @@ public:
 	std::string cancelScanById(const std::string& dataId);
 
 	/// @brief Fetch scan result by Id
-	/// 
+	///
 	/// Fetches the status of a previously initiated scan based on the scan's Id.
 	///
 	/// @param dataId DataId for a previously initiated scan
@@ -93,8 +93,8 @@ public:
 	std::unique_ptr<MDResponse<MDFileScanResult>> fetchScanResultById(const std::string& dataId);
 
 	/// @brief Fetch scan result by hash
-	/// 
-	/// Fetches the status of a previously initiated scan based on the scanned 
+	///
+	/// Fetches the status of a previously initiated scan based on the scanned
 	/// content's hash. Currently md5/sha1/sha256 hashes are supported.
 	///
 	/// @param dataId DataId for a previously initiated scan
@@ -102,8 +102,8 @@ public:
 	std::unique_ptr<MDResponse<MDFileScanResult>> fetchScanResultByHash(const std::string& hash);
 
 	/// @brief Fetch a sanitized content
-	/// 
-	/// If sanitization occured during scanning, the sanitized content can be acquired 
+	///
+	/// If sanitization occured during scanning, the sanitized content can be acquired
 	/// by calling this function.
 	///
 	/// @param dataId DataId for a previously initiated scan
@@ -111,10 +111,10 @@ public:
 	std::string fetchSanitizedFileById(const std::string& dataId);
 
 	/// @brief Fetch a sanitized content
-	/// 
-	/// If sanitization occured during scanning, the sanitized content can be acquired 
+	///
+	/// If sanitization occured during scanning, the sanitized content can be acquired
 	/// by calling this function. The content is written into the stream specified by the
-	/// outStream parameter. The stream has to be opened for writing before passing it 
+	/// outStream parameter. The stream has to be opened for writing before passing it
 	/// into this function.
 	///
 	/// @param dataId DataId for a previously initiated scan
@@ -150,7 +150,7 @@ public:
 	void cancelBatch(const std::string& batchId);
 
 	/// @brief Initiate a batched file scan
-	/// 
+	///
 	/// Initiate a new file scan and attach it to a previously initiated batch. The result of this scan will contribute to the
 	/// overall result of the batch, however it can be still fetched separatly.
 	///
@@ -160,16 +160,16 @@ public:
 	/// @param archivePwd Password for archive file
 	/// @param customHeaders Additional headers
 	/// @return Structure holding the identifier for the initiated scan
-	std::unique_ptr<MDResponse<MDFileScanId>> scanFileInBatch(std::istream& inStream, 
-		const std::string& batchId, 
-		const std::string& filename = std::string(), 
+	std::unique_ptr<MDResponse<MDFileScanId>> scanFileInBatch(std::istream& inStream,
+		const std::string& batchId,
+		const std::string& filename = std::string(),
 		const std::string& archivePwd = std::string(),
 		const Headers &customHeaders = Headers()
 	);
 
 	/// @brief Fetch batch status
 	///
-	/// Fetches the status of a previously initiated batch. The result is aggregated from the results of the file scans, which were 
+	/// Fetches the status of a previously initiated batch. The result is aggregated from the results of the file scans, which were
 	/// attached to this batch.
 	///
 	/// @param batchId Identifier of a batch
@@ -177,7 +177,7 @@ public:
 	std::unique_ptr<MDResponse<MDBatchResult>> fetchBatchScanResult(const std::string& batchId);
 
 	/// @brief Fetch the Metadefender server's version
-	/// 
+	///
 	/// Fetches the version information of the Metadefender server. It requires a valid
 	/// api key, that can be acquired by calling createSession first.
 	///
@@ -186,14 +186,14 @@ public:
 	std::unique_ptr<MDResponse<MDVersionInfo>> getVersionInfo();
 
 	/// @brief Fetch the Metadefender server's license information
-	/// 
+	///
 	/// Fetches the license information of the Metadefender server. It requires a valid
 	/// api key, that can be acquired by calling createSession first.
 	///
 	/// @param apiKey Valid api key
 	/// @return Structure holding the returned license information
 	std::unique_ptr<MDResponse<MDLicenseInfo>> getLicenseInfo();
-	
+
 	///  @brief Fetch available scan rules on Metadefender server
 	///
 	/// Fetches the available scan rules on the Metadefender server.
@@ -202,7 +202,7 @@ public:
 	std::unique_ptr <MDResponse<MDAvailableScanRules>> fetchAvailableScanRules(const std::string& userAgent = std::string());
 
 	/// @brief Create login session
-	/// 
+	///
 	/// Creates a login session and acquire an api key that is valid for the duration of the login session.
 	/// Take note, that login session is not equivalent to rest session.
 	///
@@ -221,17 +221,17 @@ public:
 	void useSession(std::string apiKey);
 
 	/// @brief Destroys login session
-	/// 
+	///
 	/// Destroys a previously created login session and invalidates the api key associated with it.
-	///	
+	///
 	/// @param apiKey Api key acquired by a previous call to createSession
 	/// @return Structure holding the returned logout information
 	std::unique_ptr<MDResponse<MDLogoutInfo>> destroySession(const std::string& apiKey);
 
 	/// @brief Fetch engine information from Metadefender server
-	/// 
+	///
 	/// Fetches the detailed information about the engines used by the Metadefender server.
-	///		
+	///
 	/// @return Structure holding the returned engine informations
 	std::unique_ptr<MDResponse<MDEnginesList>> getEngineInfo();
 
@@ -239,7 +239,7 @@ private:
 	void checkResponse(const MDHttpResponse& response) const;
 
 private:
-	
+
 	std::unique_ptr<HttpSession> session_;
 	std::string apiKey_;
 };
@@ -275,7 +275,7 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanLocalFile(con
 	};
 	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = nullptr;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -290,7 +290,7 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFile(std::ist
 																		const std::string& rule,
 																		const std::string& archivePwd,
 																		const Headers &customHeaders)
-{		
+{
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/file";
@@ -303,7 +303,7 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFile(std::ist
 	};
 	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = &inStream;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -335,7 +335,7 @@ std::unique_ptr<MDResponse<MDFileScanResult>> MDRest<HttpSession>::fetchScanResu
 	request.url = "/file/" + dataId;
 	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -351,7 +351,7 @@ std::unique_ptr<MDResponse<MDFileScanResult>> MDRest<HttpSession>::fetchScanResu
 	request.url = "/hash/" + hash;
 	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -441,9 +441,9 @@ void MDRest<HttpSession>::cancelBatch(const std::string& batchId)
 }
 
 template<typename HttpSession>
-std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(std::istream& inStream, 
-																			   const std::string& batchId, 
-																			   const std::string& filename, 
+std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(std::istream& inStream,
+																			   const std::string& batchId,
+																			   const std::string& filename,
 																			   const std::string& archivePwd,
 																			   const Headers &customHeaders)
 {
@@ -458,7 +458,7 @@ std::unique_ptr<MDResponse<MDFileScanId>> MDRest<HttpSession>::scanFileInBatch(s
 	};
 	request.headers.insert(customHeaders.begin(), customHeaders.end());
 	request.inStream = &inStream;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -489,7 +489,7 @@ std::unique_ptr<MDResponse<MDVersionInfo>> MDRest<HttpSession>::getVersionInfo()
 	request.url = "/version";
 	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -505,7 +505,7 @@ std::unique_ptr<MDResponse<MDLicenseInfo>> MDRest<HttpSession>::getLicenseInfo()
 	request.url = "/admin/license";
 	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -519,10 +519,10 @@ std::unique_ptr <MDResponse<MDLoginInfo>> MDRest<HttpSession>::createSession(con
 	MDHttpRequest request;
 	request.method = HTTP_METHOD::HTTP_POST;
 	request.url = "/login";
-	std::string body = "{\"user\":\"" + userName + "\",\"password\":\"" + password + "\"}";	
+	std::string body = "{\"user\":\"" + userName + "\",\"password\":\"" + password + "\"}";
 	std::istringstream iss(body);
 	request.inStream = &iss;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -538,7 +538,7 @@ std::unique_ptr<MDResponse<MDLogoutInfo>> MDRest<HttpSession>::destroySession(co
 	request.url = "/logout";
 	request.headers = Headers{{"apikey", apiKey}};
 	request.inStream = nullptr;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -554,7 +554,7 @@ std::unique_ptr<MDResponse<MDEnginesList>> MDRest<HttpSession>::getEngineInfo()
 	request.url = "/stat/engines";
 	request.headers = Headers{{"apikey", apiKey_}};
 	request.inStream = nullptr;
-	
+
 	auto response = session_->sendRequest(request);
 
 	checkResponse(*response);
@@ -597,7 +597,7 @@ void MDRest<HttpSession>::checkResponse(const MDHttpResponse &response) const
 		try
 		{
 			auto errorInfo = MDResponse<MDErrorInfo>(response.body).parse();
-			
+
 			throw MDErrorResponseException(errorInfo->errorMessage, response.statusCode, response.body);
 		}
 		catch(MDParsingException&)

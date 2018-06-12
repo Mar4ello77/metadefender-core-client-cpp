@@ -14,7 +14,7 @@ namespace Opswat
 
 /// @brief Libcurl based http client
 ///
-/// This class represents a simple http client, implemented by using libcurl. 
+/// This class represents a simple http client, implemented by using libcurl.
 class MDCurlHttpClient : public IMDHttpClient
 {
 public:
@@ -26,7 +26,7 @@ public:
 
 	/// @brief Initializes libcurl with ALL flags
 	///
-	/// This function calls curl_global_init, and inherently thread unsafe. Libcurl has to be initialized 
+	/// This function calls curl_global_init, and inherently thread unsafe. Libcurl has to be initialized
 	/// before calling any other function in libcurl.
 	static void curlHttpClientInitAll()
 	{
@@ -35,7 +35,7 @@ public:
 
 	/// @brief Initializes libcurl with the specified flags
 	///
-	/// This function calls curl_global_init, and inherently thread unsafe. Libcurl has to be initialized 
+	/// This function calls curl_global_init, and inherently thread unsafe. Libcurl has to be initialized
 	/// before calling any other function in libcurl.
 	///
 	/// @param flags Tells libcurl what features to initialize
@@ -222,12 +222,10 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 				throw MDConnectionException(MD_CONNECTION_ERROR);
 			}
 		}
-	}	
+	}
 	slist = curl_slist_append(slist, "Expect: ");
 	curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, slist);
 	curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, WriteCallback);
-
-	auto resp = Utils::make_unique<MDHttpResponse>();
 	curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &outStream);
 
 	char errbuf[CURL_ERROR_SIZE];
@@ -248,6 +246,8 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 			throw Opswat::MDConnectionException(curl_easy_strerror(res));
 		}
 	}
+
+	auto resp = Utils::make_unique<MDHttpResponse>();
 	curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &resp->statusCode);
 
 	return resp;
