@@ -6,7 +6,9 @@
 #include "md_exception.h"
 #include "md_error_messages.h"
 #include "md_utils.h"
+#include <cctype>
 #include <memory>
+#include <algorithm>
 #include <curl/curl.h>
 
 namespace Opswat
@@ -107,6 +109,66 @@ size_t ReadCallback(char* ptr, size_t size, size_t nmemb, void* input)
 	}
 }
 
+static
+size_t ReadHeadersCallback(char *buffer, size_t size, size_t nitems, void *userdata)
+{
+	size_t length = 0;
+
+	std::vector<std::string> *headerLines = static_cast<std::vector<std::string>*>(userdata);
+	if (headerLines != nullptr) {
+		length = size * nitems;
+		if (length > 0) {
+			headerLines->emplace_back(buffer, size * nitems);
+		}
+	}
+
+	return length;
+}
+
+static inline
+void leftTrim(std::string &s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+		return !std::isspace(ch);
+	}));
+}
+
+static inline
+void rightTrim(std::string &s) {
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+			return !std::isspace(ch);
+		}).base(), s.end());
+	}
+
+static
+std::string extractCookieFromHeaders(const std::vector<std::string> &headerLines)
+{
+	bool found = false;
+	std::string cookie;
+	for (auto line : headerLines) {
+		if (found) {
+			if (std::isspace(static_cast<unsigned char>(line[0]))) {
+				leftTrim(line);
+				rightTrim(line);
+				cookie.append(line);
+			} else {
+				return cookie;
+			}
+		} else {
+			std::string upcaseLine = line;
+			std::transform(upcaseLine.begin(), upcaseLine.end(), upcaseLine.begin(), ::toupper);
+			if (upcaseLine.find("SET-COOKIE:") == 0) {
+				const long valuePositionInLine = 11; // length of string "SET-COOKIE"
+				cookie = line.substr(valuePositionInLine);
+				leftTrim(cookie);
+				rightTrim(cookie);
+				found = true;
+			}
+		}
+	}
+
+	return cookie;
+}
+
 inline
 MDCurlHttpClient::MDCurlHttpClient(const std::string& serverAddress, int port)
 {
@@ -187,6 +249,7 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 	{
 		throw MDConnectionException(MD_CONNECTION_ERROR);
 	}
+
 	curl_slist *slist = nullptr;
 	for(auto &i : request.headers)
 	{
@@ -194,11 +257,11 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 		{
 			std::string header = i.first;
 			header += ": ";
-			if (i.first == "User-Agent") 
+			if (i.first == "User-Agent" || i.first == "Cookie")
 			{
 				header += i.second;
-			} 
-			else 
+			}
+			else
 			{
 				char* urlEncoded = curl_easy_escape(curl_, i.second.c_str(), static_cast<int>(i.second.size()));
 				if(!urlEncoded)
@@ -232,6 +295,10 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 	curl_easy_setopt(curl_, CURLOPT_ERRORBUFFER, errbuf);
 	errbuf[0] = 0;
 
+	std::vector<std::string> headersLines;
+	curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, ReadHeadersCallback);
+	curl_easy_setopt(curl_, CURLOPT_HEADERDATA, &headersLines);
+
 	CURLcode res = curl_easy_perform(curl_);
 	curl_slist_free_all(slist);
 	if(res != CURLE_OK)
@@ -249,6 +316,8 @@ std::unique_ptr<MDHttpResponse> MDCurlHttpClient::send(MDHttpRequest& request, s
 
 	auto resp = Utils::make_unique<MDHttpResponse>();
 	curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &resp->statusCode);
+
+	resp->cookie = extractCookieFromHeaders(headersLines);
 
 	return resp;
 }

@@ -27,6 +27,7 @@ struct MDHttpResponse
 	int statusCode;
 	std::string reasonPhrase;
 	std::string body;
+	std::string cookie;
 };
 
 /// \brief Http response returned by Metadefender Rest
